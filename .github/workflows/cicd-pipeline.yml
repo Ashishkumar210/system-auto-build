@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Set up JDK 21 (without cache to avoid gzip error)
+      # Step 2: Set up JDK 21 (without cache to avoid gzip errors)
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
@@ -50,8 +50,9 @@ jobs:
           Write-Host "Waiting for MySQL to be ready..."
           do {
               Start-Sleep -Seconds 3
-              $status = docker exec mysql-db mysqladmin ping -uroot -pAshish@2100 --silent
-          } while ($status -ne "mysqld is alive")
+              docker exec mysql-db mysqladmin ping -uroot -pAshish@2100 --silent
+              $status = $LASTEXITCODE
+          } while ($status -ne 0)
           Write-Host "MySQL is ready."
 
       # Step 7: Run new Spring Boot container
@@ -62,7 +63,19 @@ jobs:
             -e SPRING_PROFILES_ACTIVE=docker `
             system-auto-build-springboot-app:latest
 
-      # Wait a few seconds and check logs
-      - name: Check Spring Boot container logs
+      # Step 8: Check Spring Boot container status
+      - name: Confirm container is running
+        shell: powershell
+        run: |
+          $container = docker ps -f "name=springboot-app"
+          if ($container) {
+              Write-Host "Spring Boot container is running:"
+              docker ps | Select-String "springboot-app"
+          } else {
+              Write-Host "Spring Boot container failed to start!"
+          }
+
+      # Step 9: Check Spring Boot logs
+      - name: Check Spring Boot logs
         shell: powershell
         run: docker logs springboot-app

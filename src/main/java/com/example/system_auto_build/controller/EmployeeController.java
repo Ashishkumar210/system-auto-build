@@ -14,4 +14,9 @@ public class EmployeeController {
     public String get(){
         return "You are accessing from project";
     }
+
+    @GetMapping("/gets")
+    public String getDetails(){
+        return "You are accessing from project from details";
+    }
 }

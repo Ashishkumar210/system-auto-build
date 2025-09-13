@@ -23,13 +23,13 @@ jobs:
 
       # Step 3: Build JAR using Maven
       - name: Build JAR
-        run: mvn -B clean package -DskipTests
         shell: pwsh
+        run: mvn -B clean package -DskipTests
 
       # Step 4: Build Docker image
       - name: Build Docker image
-        run: docker build -t system-auto-build-springboot-app:latest .
         shell: pwsh
+        run: docker build -t system-auto-build-springboot-app:latest .
 
       # Step 5: Stop and remove existing Spring Boot container
       - name: Stop and remove existing container (if any)
@@ -37,8 +37,11 @@ jobs:
         run: |
           $container = docker ps -aq -f "name=springboot-app"
           if ($container) {
+              Write-Host "Stopping existing Spring Boot container..."
               docker stop $container
               docker rm $container
+          } else {
+              Write-Host "No existing Spring Boot container found."
           }
 
       # Step 6: Wait for MySQL container to be ready

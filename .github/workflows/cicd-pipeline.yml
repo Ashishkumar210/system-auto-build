@@ -9,9 +9,6 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Enable debug mode
-        run: set -x
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -21,6 +18,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      - name: Set up Maven   # ✅ Add this here
+        uses: stCarolas/setup-maven@v4
+        with:
+          maven-version: 3.9.9
+
       - name: Build JAR
         run: mvn -B clean package -DskipTests
 
@@ -28,31 +30,26 @@ jobs:
         run: docker build -t system-auto-build-springboot-app:latest .
 
       - name: Stop and remove existing container (if any)
+        shell: bash
         run: |
           docker stop springboot-app || true
           docker rm springboot-app || true
 
       - name: Wait for MySQL container
+        shell: bash
         run: |
-          echo "Waiting for MySQL on port 3307..."
-          for i in {1..15}; do
-            nc -z localhost 3307 && echo "MySQL is ready" && exit 0
-            sleep 5
+          echo "Waiting for MySQL to be ready..."
+          until docker exec mysql-db mysqladmin ping -uroot -pAshish@2100 --silent; do
+            sleep 3
           done
-          echo "MySQL did not become ready in time" && exit 1
+          echo "MySQL is ready."
 
       - name: Run new Spring Boot container
+        shell: bash
         run: |
           docker run -d --name springboot-app -p 9090:8081 \
             -e SPRING_PROFILES_ACTIVE=docker \
             system-auto-build-springboot-app:latest
 
       - name: Confirm container is running
-        run: |
-          if docker ps | grep springboot-app; then
-            echo "Spring Boot app is running ✅"
-          else
-            echo "Spring Boot app failed to start ❌"
-            docker logs springboot-app || true
-            exit 1
-          fi
+        run: docker ps | grep springboot-app

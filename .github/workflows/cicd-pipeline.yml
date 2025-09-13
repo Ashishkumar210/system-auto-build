@@ -24,19 +24,23 @@ jobs:
       - name: Build JAR
         shell: powershell
         run: mvn -B clean package -DskipTests
-      - name: Stop and remove old containers
+
+      - name: Stop and remove existing containers
         shell: powershell
         run: docker-compose -f docker-compose.yml down
 
-          # Step 4: Start Docker Compose (replaces separate Docker steps)
       - name: Start Docker Compose
         shell: powershell
         run: docker-compose -f docker-compose.yml up --build -d
 
-          # Step 5: Confirm containers are running
       - name: Confirm containers are running
         shell: powershell
         run: docker ps
+
+      - name: Check Spring Boot logs
+        shell: powershell
+        run: docker logs springboot-app
+
 
       # Step 4: Build Docker image
 #      - name: Build Docker image

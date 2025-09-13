@@ -23,17 +23,17 @@ jobs:
 
       # Step 3: Build JAR using Maven
       - name: Build JAR
-        shell: pwsh
+        shell: powershell
         run: mvn -B clean package -DskipTests
 
       # Step 4: Build Docker image
       - name: Build Docker image
-        shell: pwsh
+        shell: powershell
         run: docker build -t system-auto-build-springboot-app:latest .
 
       # Step 5: Stop and remove existing Spring Boot container
       - name: Stop and remove existing container (if any)
-        shell: pwsh
+        shell: powershell
         run: |
           $container = docker ps -aq -f "name=springboot-app"
           if ($container) {
@@ -46,7 +46,7 @@ jobs:
 
       # Step 6: Wait for MySQL container to be ready
       - name: Wait for MySQL container
-        shell: pwsh
+        shell: powershell
         run: |
           Write-Host "Waiting for MySQL to be ready..."
           do {
@@ -57,13 +57,13 @@ jobs:
 
       # Step 7: Run new Spring Boot container
       - name: Run new Spring Boot container
-        shell: pwsh
+        shell: powershell
         run: |
           docker run -d --name springboot-app -p 9090:8081 `
             -e SPRING_PROFILES_ACTIVE=docker `
             system-auto-build-springboot-app:latest
 
-      # Step 8: Confirm c
+      # Step 8: Confirm container is running
       - name: Confirm container is running
-        shell: pwsh
+        shell: powershell
         run: docker ps | Select-String "springboot-app"

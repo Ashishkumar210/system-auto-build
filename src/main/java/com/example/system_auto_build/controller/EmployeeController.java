@@ -12,7 +12,7 @@ public class EmployeeController {
         return "You are accessing from project";
     }
 
-    @GetMapping("/getsss")
+    @GetMapping("/gets")
     public String getDetails(){
         return "You are accessing from project from details";
     }

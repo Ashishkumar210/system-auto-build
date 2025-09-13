@@ -14,6 +14,7 @@ public class EmployeeController {
 
     @GetMapping("/gets")
     public String getDetails(){
-        return "You are accessing from project from details";
+        return "checking from Aws";
     }
+
 }

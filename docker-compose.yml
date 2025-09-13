@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  mysql-db:
+    image: mysql:8
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Ashish@2100
+      MYSQL_DATABASE: realtimenoti
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pAshish@2100"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+  springboot-app:
+    build: .
+    container_name: springboot-app
+    restart: always
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "9090:8081"
+
+volumes:
+  mysql_data:

@@ -1,0 +1,32 @@
+name: Local CI/CD (self-hosted)
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted   # runs on your machine (the registered runner)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build JAR
+        run: mvn -B clean package -DskipTests
+
+      - name: Build Docker image (local)
+        run: docker build -t my-spring-local:latest .
+
+      - name: Stop existing container (if any)
+        run: |
+          docker stop springboot-app || true
+          docker rm springboot-app || true
+
+      - name: Run container (local)
+        run: docker run -d --name springboot-app -p 8081:8081 my-spring-local:latest

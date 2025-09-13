@@ -33,13 +33,14 @@ jobs:
 
       # Step 5: Stop and remove existing Spring Boot container
       - name: Stop and remove existing container (if any)
+        shell: pwsh
         run: |
           $container = docker ps -aq -f "name=springboot-app"
           if ($container) {
               docker stop $container
               docker rm $container
           }
-        shell: pwsh
+        
 
       # Step 6: Wait for MySQL container to be ready
       - name: Wait for MySQL container

@@ -15,7 +15,7 @@ public class EmployeeController {
         return "You are accessing from project";
     }
 
-    @GetMapping("/gets")
+    @GetMapping("/getsss")
     public String getDetails(){
         return "You are accessing from project from details";
     }

@@ -17,11 +17,9 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: 'maven'
 
-      - name: Set up Maven   # ✅ Add this here
-        uses: stCarolas/setup-maven@v4
-        with:
-          maven-version: 3.9.9
+      # No need to set up Maven here, since it's already installed on your runner
 
       - name: Build JAR
         run: mvn -B clean package -DskipTests
@@ -30,13 +28,13 @@ jobs:
         run: docker build -t system-auto-build-springboot-app:latest .
 
       - name: Stop and remove existing container (if any)
-        shell: bash
         run: |
-          docker stop springboot-app || true
-          docker rm springboot-app || true
+          if [ "$(docker ps -aq -f name=springboot-app)" ]; then
+            docker stop springboot-app
+            docker rm springboot-app
+          fi
 
       - name: Wait for MySQL container
-        shell: bash
         run: |
           echo "Waiting for MySQL to be ready..."
           until docker exec mysql-db mysqladmin ping -uroot -pAshish@2100 --silent; do
@@ -45,11 +43,10 @@ jobs:
           echo "MySQL is ready."
 
       - name: Run new Spring Boot container
-        shell: bash
         run: |
           docker run -d --name springboot-app -p 9090:8081 \
             -e SPRING_PROFILES_ACTIVE=docker \
             system-auto-build-springboot-app:latest
 
       - name: Confirm container is running
-        run: docker ps | grep springboot-app
+        run: docker ps | findstr springboot-app

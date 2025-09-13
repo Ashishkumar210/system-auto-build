@@ -55,14 +55,14 @@ jobs:
           Write-Host "MySQL is ready."
 
       # Step 7: Run new Spring Boot container
-      - name: Run new Spring Boot container
+      - name: Run Spring Boot container
         shell: powershell
         run: |
-          docker run -d --name springboot-app -p 9090:8081 `
+          docker run -d --name springboot-app -p 9090:8080 `
             -e SPRING_PROFILES_ACTIVE=docker `
             system-auto-build-springboot-app:latest
 
-      # Step 8: Confirm container is running
-      - name: Confirm container is running
+      # Wait a few seconds and check logs
+      - name: Check Spring Boot container logs
         shell: powershell
-        run: docker ps | Select-String "springboot-app"
+        run: docker logs springboot-app

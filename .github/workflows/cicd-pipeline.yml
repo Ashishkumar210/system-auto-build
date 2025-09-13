@@ -9,9 +9,11 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Step 2: Set up JDK 21
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
@@ -19,12 +21,15 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      # Step 3: Build JAR using Maven
       - name: Build JAR
         run: mvn -B clean package -DskipTests
 
+      # Step 4: Build Docker image
       - name: Build Docker image
         run: docker build -t system-auto-build-springboot-app:latest .
 
+      # Step 5: Stop and remove existing Spring Boot container (PowerShell)
       - name: Stop and remove existing container (if any)
         run: |
           $container = docker ps -aq -f "name=springboot-app"
@@ -33,6 +38,7 @@ jobs:
               docker rm $container
           }
 
+      # Step 6: Wait for MySQL container to be ready (PowerShell)
       - name: Wait for MySQL container
         run: |
           Write-Host "Waiting for MySQL to be ready..."
@@ -42,11 +48,13 @@ jobs:
           } while ($status -ne "mysqld is alive")
           Write-Host "MySQL is ready."
 
+      # Step 7: Run new Spring Boot container (PowerShell)
       - name: Run new Spring Boot container
         run: |
           docker run -d --name springboot-app -p 9090:8081 `
             -e SPRING_PROFILES_ACTIVE=docker `
             system-auto-build-springboot-app:latest
 
+      # Step 8: Confirm container is running
       - name: Confirm container is running
         run: docker ps | Select-String "springboot-app"

@@ -6,10 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class EmployeeController {
-//    public void createEmployee(){
-//        Employee employee=new Employee();
-//        employee.setName("Ashish");
-//    }
+
     @GetMapping("/get")
     public String get(){
         return "You are accessing from project";

@@ -6,42 +6,28 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: self-hosted   # runs on your self-hosted runner
+    runs-on: self-hosted  # your self-hosted Windows runner
 
     steps:
-      # Step 1: Checkout repository
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Set up JDK 21
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      # Step 3: Build Spring Boot JAR
       - name: Build JAR
-        run: mvn clean package -DskipTests
+        run: mvn -B clean package -DskipTests
 
-      # Step 4: Deploy using Docker Compose
-      - name: Deploy with Docker Compose
+      - name: Build Docker image
+        run: docker build -t system-auto-build-springboot-app:latest .
+
+      - name: Stop existing container (if any)
         run: |
-          # Stop and remove old containers
-          docker-compose down
-          
-          # Build images and start containers in detached mode
-          docker-compose up -d --build
+          docker stop springboot-app || true
+          docker rm springboot-app || true
 
-      # Step 5: Wait for MySQL healthcheck to pass
-      - name: Wait for MySQL
-        run: |
-          echo "Waiting for MySQL to be healthy..."
-          until [ "$(docker inspect -f '{{.State.Health.Status}}' mysql-db)" == "healthy" ]; do
-            sleep 5
-          done
-          echo "MySQL is healthy!"
-
-      # Step 6: Show running containers
-      - name: List running containers
-        run: docker ps
+      - name: Run container
+        run: docker run -d --name springboot-app -p 9090:8081 system-auto-build-springboot-app:latest

@@ -40,10 +40,10 @@ jobs:
               docker stop $container
               docker rm $container
           }
-        
 
       # Step 6: Wait for MySQL container to be ready
       - name: Wait for MySQL container
+        shell: pwsh
         run: |
           Write-Host "Waiting for MySQL to be ready..."
           do {
@@ -51,17 +51,16 @@ jobs:
               $status = docker exec mysql-db mysqladmin ping -uroot -pAshish@2100 --silent
           } while ($status -ne "mysqld is alive")
           Write-Host "MySQL is ready."
-        shell: pwsh
 
       # Step 7: Run new Spring Boot container
       - name: Run new Spring Boot container
+        shell: pwsh
         run: |
           docker run -d --name springboot-app -p 9090:8081 `
             -e SPRING_PROFILES_ACTIVE=docker `
             system-auto-build-springboot-app:latest
-        shell: pwsh
 
       # Step 8: Confirm container is running
       - name: Confirm container is running
-        run: docker ps | Select-String "springboot-app"
         shell: pwsh
+        run: docker ps | Select-String "springboot-app"

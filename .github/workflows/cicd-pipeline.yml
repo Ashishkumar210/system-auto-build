@@ -26,18 +26,17 @@ jobs:
 
       - name: Stop and remove existing container (if any)
         run: |
-          if [ "$(docker ps -aq -f name=springboot-app)" ]; then
-            docker stop springboot-app
-            docker rm springboot-app
-          fi
+          docker stop springboot-app || true
+          docker rm springboot-app || true
 
       - name: Wait for MySQL container
         run: |
-          echo "Waiting for MySQL to be ready..."
-          until docker exec mysql-db mysqladmin ping -uroot -pAshish@2100 --silent; do
-            sleep 3
+          echo "Waiting for MySQL on port 3307..."
+          for i in {1..15}; do
+            nc -z localhost 3307 && echo "MySQL is ready" && exit 0
+            sleep 5
           done
-          echo "MySQL is ready."
+          echo "MySQL did not become ready in time" && exit 1
 
       - name: Run new Spring Boot container
         run: |
@@ -46,4 +45,9 @@ jobs:
             system-auto-build-springboot-app:latest
 
       - name: Confirm container is running
-        run: docker ps | grep springboot-app
+        run: |
+          if docker ps | grep springboot-app; then
+            echo "Spring Boot app is running ✅"
+          else
+            echo "Spring Boot app failed to start ❌" && exit 1
+          fi

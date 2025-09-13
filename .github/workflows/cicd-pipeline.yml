@@ -19,8 +19,6 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # No need to set up Maven here, since it's already installed on your runner
-
       - name: Build JAR
         run: mvn -B clean package -DskipTests
 
@@ -29,24 +27,26 @@ jobs:
 
       - name: Stop and remove existing container (if any)
         run: |
-          if [ "$(docker ps -aq -f name=springboot-app)" ]; then
-            docker stop springboot-app
-            docker rm springboot-app
-          fi
+          $container = docker ps -aq -f "name=springboot-app"
+          if ($container) {
+              docker stop $container
+              docker rm $container
+          }
 
       - name: Wait for MySQL container
         run: |
-          echo "Waiting for MySQL to be ready..."
-          until docker exec mysql-db mysqladmin ping -uroot -pAshish@2100 --silent; do
-            sleep 3
-          done
-          echo "MySQL is ready."
+          Write-Host "Waiting for MySQL to be ready..."
+          do {
+              Start-Sleep -Seconds 3
+              $status = docker exec mysql-db mysqladmin ping -uroot -pAshish@2100 --silent
+          } while ($status -ne "mysqld is alive")
+          Write-Host "MySQL is ready."
 
       - name: Run new Spring Boot container
         run: |
-          docker run -d --name springboot-app -p 9090:8081 \
-            -e SPRING_PROFILES_ACTIVE=docker \
+          docker run -d --name springboot-app -p 9090:8081 `
+            -e SPRING_PROFILES_ACTIVE=docker `
             system-auto-build-springboot-app:latest
 
       - name: Confirm container is running
-        run: docker ps | findstr springboot-app
+        run: docker ps | Select-String "springboot-app"

@@ -9,6 +9,9 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Enable debug mode
+        run: set -x
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -49,5 +52,7 @@ jobs:
           if docker ps | grep springboot-app; then
             echo "Spring Boot app is running ✅"
           else
-            echo "Spring Boot app failed to start ❌" && exit 1
+            echo "Spring Boot app failed to start ❌"
+            docker logs springboot-app || true
+            exit 1
           fi

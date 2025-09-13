@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: self-hosted  # your self-hosted Windows runner
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
@@ -24,10 +24,17 @@ jobs:
       - name: Build Docker image
         run: docker build -t system-auto-build-springboot-app:latest .
 
-      - name: Stop existing container (if any)
+      - name: Stop existing container
         run: |
           docker stop springboot-app || true
           docker rm springboot-app || true
 
       - name: Run container
-        run: docker run -d --name springboot-app -p 9090:8081 system-auto-build-springboot-app:latest
+        run: |
+          docker run -d --name springboot-app -p 9090:8081 \
+            -e "SPRING_PROFILES_ACTIVE=docker" system-auto-build-springboot-app:latest
+          # Wait for MySQL to be ready
+          until docker exec mysql-db mysqladmin ping -uroot -pAshish@2100 --silent; do
+            echo "Waiting for MySQL..."
+            sleep 3
+          done

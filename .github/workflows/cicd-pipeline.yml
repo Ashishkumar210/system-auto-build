@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: self-hosted   # runs on your machine (the registered runner)
+    runs-on: self-hosted   # runs on your self-hosted runner
 
     steps:
       # Step 1: Checkout repository
@@ -33,6 +33,15 @@ jobs:
           # Build images and start containers in detached mode
           docker-compose up -d --build
 
-      # Step 5: Show running containers
+      # Step 5: Wait for MySQL healthcheck to pass
+      - name: Wait for MySQL
+        run: |
+          echo "Waiting for MySQL to be healthy..."
+          until [ "$(docker inspect -f '{{.State.Health.Status}}' mysql-db)" == "healthy" ]; do
+            sleep 5
+          done
+          echo "MySQL is healthy!"
+
+      # Step 6: Show running containers
       - name: List running containers
         run: docker ps

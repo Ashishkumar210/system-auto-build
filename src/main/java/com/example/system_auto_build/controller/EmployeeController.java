@@ -16,5 +16,9 @@ public class EmployeeController {
     public String getDetails(){
         return "checking from Aws";
     }
+    @GetMapping("/new/function")
+    public String getFunctionDetails(){
+        return "checking from New Function";
+    }
 
 }

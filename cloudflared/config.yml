@@ -1,0 +1,7 @@
+tunnel: 417deae4-ce31-4dd0-b2f0-63660a59f2f8
+credentials-file: C:\appractices\system-auto-build\cloudflared\tunnel.json
+
+ingress:
+  - hostname: ashish.yourdomain.com
+    service: http://localhost:9090
+  - service: http_status:404

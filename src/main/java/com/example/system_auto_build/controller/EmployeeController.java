@@ -25,7 +25,7 @@ public class EmployeeController {
 
     @GetMapping("/gets")
     public String getDetai(){
-        return "checking from Aw";
+        return "checking from Awrt";
     }
 
 }

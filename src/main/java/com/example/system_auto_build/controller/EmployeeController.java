@@ -21,4 +21,11 @@ public class EmployeeController {
         return "checking from New Function";
     }
 
+
+
+    @GetMapping("/gets")
+    public String getDetai(){
+        return "checking from Aws";
+    }
+
 }

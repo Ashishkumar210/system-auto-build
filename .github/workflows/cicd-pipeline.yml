@@ -13,26 +13,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Set up JDK 21
-      - name: Set up JDK 21
+      # Step 2: Set up JDK 21 **with Maven**
+      - name: Set up Java & Maven
         uses: actions/setup-java@v3
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: maven   # caches ~/.m2/repository to speed up builds
+          cache: maven   # Caches ~/.m2/repository and sets up Maven 3 automatically
 
-      # Step 3: Set up Maven (ensures 'mvn' is in PATH)
-      - name: Set up Maven
-        uses: sormuras/setup-maven@v3
-        with:
-          version: '3.9.4'   # specify your Maven version
-
-      # Step 4: Build JAR using Maven
+      # Step 3: Build JAR using Maven
       - name: Build JAR
         shell: powershell
         run: mvn -B clean package -DskipTests
 
-      # Step 5: Stop and remove any existing containers (fail-safe)
+      # Step 4: Stop and remove any existing containers (fail-safe)
       - name: Stop and remove existing containers
         shell: powershell
         run: |
@@ -41,12 +35,12 @@ jobs:
           $containers = docker ps -aq -f "name=mysql-db"
           if ($containers) { docker rm -f $containers }
 
-      # Step 6: Start Docker Compose (build images and start containers)
+      # Step 5: Start Docker Compose
       - name: Start Docker Compose
         shell: powershell
         run: docker-compose -f docker-compose.yml up --build -d
 
-      # Step 7: Wait for MySQL container to be ready
+      # Step 6: Wait for MySQL container to be ready
       - name: Wait for MySQL container
         shell: powershell
         run: |
@@ -58,12 +52,12 @@ jobs:
           } while ($status -ne 0)
           Write-Host "MySQL is ready."
 
-      # Step 8: Confirm containers are running
+      # Step 7: Confirm containers are running
       - name: Confirm containers are running
         shell: powershell
         run: docker ps
 
-      # Step 9: Check Spring Boot logs
+      # Step 8: Check Spring Boot logs
       - name: Check Spring Boot logs
         shell: powershell
         run: docker logs springboot-app

@@ -23,7 +23,7 @@ public class EmployeeController {
 
 
 
-    @GetMapping("/gets")
+    @GetMapping("/getsss")
     public String getDetai(){
         return "checking from Awrssghh";
     }

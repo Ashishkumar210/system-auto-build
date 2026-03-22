@@ -13,13 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Set up JDK 21 **with Maven**
-      - name: Set up Java & Maven
+      # Step 2: Set up JDK 21
+      - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: maven   # Caches ~/.m2/repository and sets up Maven 3 automatically
 
       # Step 3: Build JAR using Maven
       - name: Build JAR
@@ -31,11 +30,22 @@ jobs:
         shell: powershell
         run: |
           $containers = docker ps -aq -f "name=springboot-app"
-          if ($containers) { docker rm -f $containers } 
-          $containers = docker ps -aq -f "name=mysql-db"
-          if ($containers) { docker rm -f $containers }
+          if ($containers) {
+              Write-Host "Removing existing Spring Boot container..."
+              docker rm -f $containers
+          } else {
+              Write-Host "No existing Spring Boot container found."
+          }
 
-      # Step 5: Start Docker Compose
+          $containers = docker ps -aq -f "name=mysql-db"
+          if ($containers) {
+              Write-Host "Removing existing MySQL container..."
+              docker rm -f $containers
+          } else {
+              Write-Host "No existing MySQL container found."
+          }
+
+      # Step 5: Start Docker Compose (build images and start containers)
       - name: Start Docker Compose
         shell: powershell
         run: docker-compose -f docker-compose.yml up --build -d

@@ -23,7 +23,7 @@ jobs:
 
       # Step 3: Build JAR using Maven
       - name: Build JAR
-        shell: cmd
+        shell: powershell
         run: mvn -B clean package -DskipTests
 
       # Step 4: Stop and remove any existing containers (fail-safe)
